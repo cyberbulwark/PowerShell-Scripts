@@ -1,0 +1,20 @@
+Invoke-Command -ComputerName "Server Name" -ScriptBlock {
+    $instances = Get-ItemProperty `
+        "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL" `
+        -ErrorAction Stop
+
+    $instances.PSObject.Properties |
+        Where-Object Name -NotLike "PS*" |
+        ForEach-Object {
+            $setup = Get-ItemProperty `
+                "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\$($_.Value)\Setup"
+
+            [PSCustomObject]@{
+                Computer   = $env:COMPUTERNAME
+                Instance   = $_.Name
+                Edition    = $setup.Edition
+                Version    = $setup.Version
+                PatchLevel = $setup.PatchLevel
+            }
+        }
+}
