@@ -1,0 +1,9 @@
+(Get-ADForest).Domains | ForEach-Object {
+    Get-ADUser -Filter "SamAccountName -eq 'jpadmin'" `
+        -Server $_ `
+        -Properties Enabled,LastLogonDate |
+    Select-Object Name,SamAccountName,Enabled,LastLogonDate,DistinguishedName,@{
+        Name='Domain'
+        Expression={ $_.DistinguishedName -replace '^.*?,DC=','' -replace ',DC=','.' }
+    }
+}
